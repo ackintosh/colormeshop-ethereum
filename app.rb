@@ -4,11 +4,17 @@ require 'ethereum'
 require 'color_me_shop'
 
 get '/' do
-  sale_api = sale_api(ENV['COLORMESHOP_ACCESS_TOKEN'])
-  p sale_api.get_sales
-
   client = Ethereum::HttpClient.new('http://localhost:7545')
   contract = Ethereum::Contract.create(name: 'Colormeshop', truffle: { paths: ['./']}, client: client)
+
+  sale_api(ENV['COLORMESHOP_ACCESS_TOKEN']).get_sales[:sales].each do |s|
+    s[:details].each do |d|
+      p "detail couldn't sync as product_id: #{d[:product_id]} doesn't have product_model_number." and next unless d[:product_model_number].present?
+
+      contract.transact_and_wait.add_product_transaction(d[:product_model_number], d[:product_num])
+    end
+  end
+
   count = contract.call.product_transaction_count
   rows = []
   count.times do |i|
