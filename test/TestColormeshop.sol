@@ -13,4 +13,11 @@ contract TestColormeshop {
 
         Assert.equal(returnedValue, expected, "ProductTransaction should be recorded.");
     }
+
+    function testContractCountsProductTransactions() public {
+        uint count = colormeshop.productTransactionCount();
+        uint expected = 1;
+
+        Assert.equal(count, expected, "");
+    }
 }
